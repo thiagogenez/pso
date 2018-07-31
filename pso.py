@@ -114,22 +114,6 @@ class Pso(Process):
 
     """
     ---------------------------------------------------------------------------
-    1 - cada divisao eh um PSO (PSO x numero de divisoes)
-    2 - uma particula eh um conjunto de jogador
-    3 - cada particula eh uma solucao paa divisao
-
-    PARTICULA = [Jogador1, Jogador2, ..., JogadorN]
-    ENXAME    = [Particula1, Particua2, ...
-
-    **
-    4 - Todos os jogadores estaram em todas os enxames, porem aqueles que nao
-        estiverem na respectiva divisao serao desativados.
-    
-    5 - 
-
-
-
-
     """
 
 
@@ -176,6 +160,30 @@ class Pso(Process):
 
             with self.__locks[0]:
                 fitnessValues = self.__fitness(allPlayers);
+
+            # pyswarms.discrete.binary.BinaryPSO(n_particles, dimensions, options, init_pos=None, velocity_clamp=None, ftol=-inf)
+            # n_particles == int – number of particles in the swarm.
+            # dimensions  == int – number of dimensions in the space.
+            # velocity_clamp tuple (default is None) – a tuple of size 2 where the first entry is the minimum velocity and the second entry is the maximum velocity. It sets the limits for velocity clamping.
+            # options == dict with keys {'c1', 'c2', 'k', 'p'} – a dictionary containing the parameters for the specific optimization technique 
+            # c1 :float cognitive parameter
+            # c2 :float social parameter
+            # w  :float inertia parameter
+            # k  :int number of neighbors to be considered. Must be a positive integer less than n_particles
+            # p  :int {1,2} the Minkowski p-norm to use. 1 is the sum-of-absolute values (or L1 distance) while 2 is the Euclidean (or L2) distance.
+            # 
+
+            # optimize(objective_func, iters, print_step=1, verbose=1)[source]
+            # Optimizes the swarm for a number of iterations.
+            # Performs the optimization to evaluate the objective function f for a number of iterations iter.
+            # Parameters:	
+            # objective_func (function) – objective function to be evaluated
+            # iters (int) – number of iterations
+            # print_step (int (the default is 1)) – amount of steps for printing into console.
+            # verbose (int (the default is 1)) – verbosity setting.
+
+
+
 
             ## TODO: To do anything PSO:
             ## TODO: how associate?
