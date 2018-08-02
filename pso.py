@@ -15,6 +15,7 @@ from __future__                  import with_statement;
 import sys;
 import pyswarm as ps; 
 import time;
+import json;
 
 from multiprocessing             import Process, Queue, Lock;
 
@@ -26,23 +27,12 @@ from multiprocessing             import Process, Queue, Lock;
 ###############################################################################
 ## DEFINITION                                                                ##
 ###############################################################################
-ALL_PLAYERS={
-'player01':{'score':0.1, 'resources':10, 'enables':[True,False,False]},
-'player02':{'score':0.1, 'resources':10, 'enables':[True,False,False]},
-'player03':{'score':0.1, 'resources':10, 'enables':[True,False,False]},
-'player04':{'score':0.1, 'resources':10, 'enables':[True,False,False]},
-'player05':{'score':0.1, 'resources':10, 'enables':[True,False,False]},
-'player06':{'score':0.1, 'resources':10, 'enables':[True,False,False]},
-'player07':{'score':0.1, 'resources':10, 'enables':[True,False,False]},
-'player08':{'score':0.1, 'resources':10, 'enables':[True,False,False]},
-'player09':{'score':0.1, 'resources':10, 'enables':[True,False,False]},
-}
-
 NUM_DIVISIONS=3
 
 FEATURES = ['score','resources'];
 ROUNDS   = [1.0, 1.1, 1.2];
 
+FILE_PREFIX = "simulation_events_divsion_"
 
 
 
@@ -131,7 +121,7 @@ class Pso(Process):
     ###########################################################################
     ## SPECIAL METHODS                                                       ##
     ###########################################################################
-    def __init__(self, allPlayers, features, psoNumber, locks, queue, roundTime):
+    def __init__(self, features, psoNumber, locks, queue, roundTime):
         super(Pso, self).__init__();
 
         self.__locks = locks;
@@ -139,15 +129,8 @@ class Pso(Process):
 
         ## Set round time:
         self.__roundTime = roundTime;
-
-        ## Number of particles is the size of J set:
-        self.__particles = len(ALL_PLAYERS);
-
-        ##
-        self.__features = features;
-
-        ## Get PSO number (meaning the division number):
         self.__psoNumber = psoNumber;
+        self.__features  = features;
 
 
     ###########################################################################
@@ -156,16 +139,31 @@ class Pso(Process):
     def run(self):
 
         while True:
-            allPlayer = self.__get_players();
 
-            with self.__locks[0]:
-                fitnessValues = self.__fitness(allPlayers);
+
+            ## Obtem os jogadores dos arquivos simulation_events_divsion_N.txt
+            ## cada thread (divisao) le o seu respectivo arquivo.
+            allPlayers = self.__get_players();
+
+
+
+
+            #n = 
+
+
+
+            #return 0
+
+            #particles = len(allPlayer);
+
+            #with self.__locks[0]:
+            #    fitnessValues = self.__fitness(allPlayers);
 
             # pyswarms.discrete.binary.BinaryPSO(n_particles, dimensions, options, init_pos=None, velocity_clamp=None, ftol=-inf)
-            # n_particles == int – number of particles in the swarm.
-            # dimensions  == int – number of dimensions in the space.
-            # velocity_clamp tuple (default is None) – a tuple of size 2 where the first entry is the minimum velocity and the second entry is the maximum velocity. It sets the limits for velocity clamping.
-            # options == dict with keys {'c1', 'c2', 'k', 'p'} – a dictionary containing the parameters for the specific optimization technique 
+            # n_particles == int number of particles in the swarm.
+            # dimensions  == int number of dimensions in the space.
+            # velocity_clamp tuple (default is None) a tuple of size 2 where the first entry is the minimum velocity and the second entry is the maximum velocity. It sets the limits for velocity clamping.
+            # options == dict with keys {'c1', 'c2', 'k', 'p'} a dictionary containing the parameters for the specific optimization technique 
             # c1 :float cognitive parameter
             # c2 :float social parameter
             # w  :float inertia parameter
@@ -177,10 +175,12 @@ class Pso(Process):
             # Optimizes the swarm for a number of iterations.
             # Performs the optimization to evaluate the objective function f for a number of iterations iter.
             # Parameters:	
-            # objective_func (function) – objective function to be evaluated
-            # iters (int) – number of iterations
-            # print_step (int (the default is 1)) – amount of steps for printing into console.
-            # verbose (int (the default is 1)) – verbosity setting.
+            # objective_func (function) objective function to be evaluated
+            # iters (int) number of iterations
+            # print_step (int (the default is 1)) amount of steps for printing into console.
+            # verbose (int (the default is 1)) verbosity setting.
+            #
+            # optimizer(self.__fitness, 
 
 
 
@@ -189,13 +189,13 @@ class Pso(Process):
             ## TODO: how associate?
             
             ## Send to management:
-            with self.__locks[1]:
-                values = {
-                    'fitnessValues': fitnessValues,
-                    'id'           : self.__psoNumber
-                };
+            #with self.__locks[1]:
+            #    values = {
+            #        'fitnessValues': fitnessValues,
+            #        'id'           : self.__psoNumber
+            #    };
 
-                self.__queue.put(values);
+            #    self.__queue.put(values);
 
             time.sleep(self.__roundTime);
             
@@ -247,16 +247,24 @@ class Pso(Process):
     ## @PARAM player == player to calculate the value.
     ##
     def __function_G(self, player):
+
+
+
         ## TODO: validate!!!!!
         return player['score'] + player['resources'];
 
 
     ##
-    ##
+    ## BRIEF:
+    ## ------------------------------------------------------------------------
     ##
     def __get_players(self):
-        global ALL_PLAYERS;
-        return ALL_PLAYERS;
+
+        with open(FILE_PREFIX + str(self.__psoNumber+1) + ".txt") as fp:
+           allPlayers = json.load(fp)
+
+        return allPlayers;
+
 ## END CLASS.
 
 
@@ -279,8 +287,7 @@ class Main:
     ###########################################################################
     __threadsId  = [];
     __psoNumber  = None;
-    __allPlayers = None;
-    __allFeatures= None;
+    __features   = None;
     __running    = True;
     __roundTimes = None;
     __locks      = None;
@@ -290,17 +297,11 @@ class Main:
     ###########################################################################
     ## SPECIAL METHODS                                                       ##
     ###########################################################################
-    def __init__(self, divisions, allPlayers, allFeatures, roundTimes):
+    def __init__(self, conf):
 
-        ## Set divisions:
-        self.__psoNumber = divisions;
-
-        ## Set the players and the features to explore.
-        self.__allPlayers  = allPlayers;
-        self.__allFeatures = allFeatures;
-
-        ##
-        self.__roundTimes = roundTimes;
+        self.__psoNumber  = conf['number_psos'];
+        self.__features   = conf['features'   ];
+        self.__roundTimes = conf['rounds'     ];
 
         self.__locks = [Lock(),Lock()];
         self.__queue = Queue();
@@ -313,8 +314,7 @@ class Main:
 
         ## Create all threads.The number of threads are defineds in the cfgFile.
         for psoNumber in range(0, self.__psoNumber):
-            newPso = Pso(self.__allPlayers , 
-                         self.__allFeatures,
+            newPso = Pso(self.__features,
                          psoNumber, 
                          self.__locks, 
                          self.__queue, self.__roundTimes[psoNumber]);
@@ -364,9 +364,6 @@ class Main:
             thread.join();
 
         return 0;
-
-
-
 ## END CLASS.
 
 
@@ -381,8 +378,14 @@ class Main:
 ###############################################################################
 if __name__ == "__main__":
 
+    conf = {
+        "number_psos" : NUM_DIVISIONS,
+        "features"    : FEATURES,
+        "rounds"      : ROUNDS
+    };
+
     try:
-        main = Main(NUM_DIVISIONS, ALL_PLAYERS, FEATURES, ROUNDS);
+        main = Main(conf);
         main.run();
 
     except ValueError as exceptionNotice:

@@ -1,0 +1,26 @@
+{
+    "ROUND"      : "5",
+    "INTERATIONS": {
+        "0": {
+             "player01": {"score": "0.1", "resources_avaliable": "10", "resources_total": "20"},
+             "player02": {"score": "0.2", "resources_avaliable": "11", "resources_total": "20"},
+             "player03": {"score": "0.3", "resources_avaliable": "12", "resources_total": "20"},
+             "player04": {"score": "0.4", "resources_avaliable": "13", "resources_total": "20"},
+             "player05": {"score": "0.5", "resources_avaliable": "14", "resources_total": "20"}
+        },
+        "1": {
+             "player01": {"score": "0.1", "resources_avaliable": "10", "resources_total": "20"},
+             "player02": {"score": "0.2", "resources_avaliable": "11", "resources_total": "20"},
+             "player03": {"score": "0.3", "resources_avaliable": "12", "resources_total": "20"},
+             "player04": {"score": "0.4", "resources_avaliable": "13", "resources_total": "20"},
+             "player05": {"score": "0.5", "resources_avaliable": "14", "resources_total": "20"}
+        },
+        "2": {
+             "player01": {"score": "0.1", "resources_avaliable": "10", "resources_total": "20"},
+             "player02": {"score": "0.2", "resources_avaliable": "11", "resources_total": "20"},
+             "player03": {"score": "0.3", "resources_avaliable": "12", "resources_total": "20"},
+             "player04": {"score": "0.4", "resources_avaliable": "13", "resources_total": "20"},
+             "player05": {"score": "0.5", "resources_avaliable": "14", "resources_total": "20"}
+        }
+    }
+}
