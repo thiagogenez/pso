@@ -12,12 +12,19 @@
 ###############################################################################
 from __future__                  import with_statement;
 
-import sys;
-import pyswarm as ps; 
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
+
+
+import pyswarms as ps; 
 import time;
+import sys;
 import json;
+import numpy as np;
 
 from multiprocessing             import Process, Queue, Lock;
+
 
 
 
@@ -33,6 +40,54 @@ FEATURES = ['score','resources'];
 ROUNDS   = [1.0, 1.1, 1.2];
 
 FILE_PREFIX = "simulation_events_divsion_"
+
+
+
+
+
+
+
+###############################################################################
+## FUNCTIONS                                                                 ##
+###############################################################################
+##
+## BRIEF:
+## ----------------------------------------------------------------------------
+## 
+##
+def Classifier(params):
+    return 0;
+##
+
+
+
+
+##
+## BRIEF:
+## ----------------------------------------------------------------------------
+## 
+##
+def Fitness(x):
+
+    """Higher-level method to do forward_prop in the
+    whole swarm.
+
+    Inputs
+    ------
+    x: numpy.ndarray of shape (n_particles, dimensions)
+        The swarm that will perform the search
+
+    Returns
+    -------
+    numpy.ndarray of shape (n_particles, )
+        The computed loss for each particle
+    """
+
+    n_particles = x.shape[0];
+    j = [Classifier(x[i]) for i in range(n_particles)];
+
+    return np.array(j);
+##
 
 
 
@@ -148,16 +203,6 @@ class Pso(Process):
 
 
 
-            #n = 
-
-
-
-            #return 0
-
-            #particles = len(allPlayer);
-
-            #with self.__locks[0]:
-            #    fitnessValues = self.__fitness(allPlayers);
 
             # pyswarms.discrete.binary.BinaryPSO(n_particles, dimensions, options, init_pos=None, velocity_clamp=None, ftol=-inf)
             # n_particles == int number of particles in the swarm.
@@ -180,8 +225,17 @@ class Pso(Process):
             # print_step (int (the default is 1)) amount of steps for printing into console.
             # verbose (int (the default is 1)) verbosity setting.
             #
-            # optimizer(self.__fitness, 
 
+            options = {'c1': 0.5, 'c2': 0.5, 'w':0.9, 'k': 30, 'p':2}
+
+            # Call instance of PSO
+            dimensions = len(allPlayers) # dimensions should be the number of features
+
+            ##
+            optimizer = ps.discrete.BinaryPSO(n_particles=30, dimensions=dimensions, options=options)
+
+            # Perform optimization
+            cost, pos = optimizer.optimize(Fitness, print_step=100, iters=1000, verbose=2)
 
 
 
@@ -212,18 +266,18 @@ class Pso(Process):
     ##         finida (envolvendo os historicos, scores, etc)
     ## ------------------------------------------------------------------------
     ## 
-    def __fitness(self, particles):
-        fitnessValues = [];
+    #def __fitness(self, particles):
+    #    fitnessValues = [];
 
-        for player in particles.keys():
+    #    for player in particles.keys():
 
             ## Calculate individual value:
-            individualFitnessValue = self.__per_player(particles[player]);
+    #        individualFitnessValue = self.__per_player(particles[player]);
 
             ## Store the value;
-            fitnessValues.append(individualFitnessValue);
+    #        fitnessValues.append(individualFitnessValue);
 
-        return fitnessValues;
+    #    return fitnessValues;
 
 
     ##
@@ -231,14 +285,14 @@ class Pso(Process):
     ## ------------------------------------------------------------------------
     ## @PARAM player == player to calculate the value.
     ##
-    def __per_player(self, player):
-        fitnessValue = 0.0;
+    #def __per_player(self, player):
+    #    fitnessValue = 0.0;
 
         ## Check if the player is enable to this PSO.
-        if player['enables'][self.__psoNumber] == True:
-            fitnessValue = self.__function_G(player);
+    #    if player['enables'][self.__psoNumber] == True:
+    #        fitnessValue = self.__function_G(player);
 
-        return fitnessValue;
+    #    return fitnessValue;
 
 
     ##
@@ -246,12 +300,12 @@ class Pso(Process):
     ## ------------------------------------------------------------------------
     ## @PARAM player == player to calculate the value.
     ##
-    def __function_G(self, player):
+    #def __function_G(self, player):
 
 
 
         ## TODO: validate!!!!!
-        return player['score'] + player['resources'];
+    #    return player['score'] + player['resources'];
 
 
     ##
