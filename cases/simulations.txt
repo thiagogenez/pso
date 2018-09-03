@@ -1,0 +1,3 @@
+{
+    "case01": {"nP": "5", "nD": "15", "nE": "5", "nAI": "0", "nAF": "2", "sizeOfSlots": "10", "wDivisions": "False", "wE": "1.0", "wD": "0.9", "wP":"0.1"}
+}
