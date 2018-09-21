@@ -1,12 +1,6 @@
 #!/usr/bin/env python
 
 
-
-
-
-
-
-
 ###############################################################################
 ## IMPORT                                                                    ##
 ###############################################################################
@@ -22,6 +16,8 @@ import random;
 import numpy as np
 
 
+
+import pyswarms as ps
 
 
 
@@ -46,7 +42,7 @@ WP = 0.1
 FILE_CONFIG = False;
 FILE="cases/simulations.txt"
 
-TYPE="order"
+TYPE="pso"
 
 
 
@@ -56,14 +52,86 @@ TYPE="order"
 ###############################################################################
 ## CLASSES                                                                   ##
 ###############################################################################
-class Main:
 
+class myPSO:
+    ###########################################################################
+    ## ATTRIBUTES                                                            ##
+    ###########################################################################
+
+    # Set-up hyperparameters
+    __options = {}
+    __particles = 0
+    __dimensions = 0
+    __players = []
+
+    def __init__(self, players, options={'c1': 0.5, 'c2': 0.3, 'w':0.9}):
+
+        self.__options = options
+        self.__particles = len(players)
+        self.__players = players
+        self.__dimensions = 3
+        self.__constraints = (np.array([-7, -5, -3]),np.array([7, 5, 3]))
+
+    def forward_prop(self,params, idx):
+        player = self.__players[idx]
+        return player[1]**params[0] + player[2]**params[1] + player[3]**params[2]
+
+    def f(self, x):
+        n_particles = x.shape[0]
+        j = [self.forward_prop(x[i], i) for i in range(n_particles)]
+        return np.array(j)
+
+
+
+    def remove_player(self, player_to_remove):
+
+        new_list = []
+        for player in self.__players:
+            if player[0] != player_to_remove[0]:
+                new_list.append(player)
+        
+        self.__players = new_list
+    
+
+    def get_player(self, cost, pos):
+    
+        for idx in range(len(self.__players)):
+            c = self.forward_prop(pos, idx)
+            if c == cost:
+                return self.__players[idx]
+
+        return None
+    def run(self):
+
+        ordered_list = []
+        
+        while len(self.__players) > 0:
+
+            # Call instance of PSO
+        
+            optimizer = ps.single.GlobalBestPSO(n_particles=self.__particles, dimensions=self.__dimensions, options=self.__options)  
+            
+            # Perform optimization
+            cost, pos = optimizer.optimize(self.f, print_step=10, iters=100, verbose=0)
+            
+        
+            player = self.get_player(cost, pos)
+            self.remove_player(player)
+
+            ordered_list.append(player)
+            self.__particles = self.__particles - 1
+            
+            #print ordered_list
+            
+        
+        return np.array(ordered_list)
+        
+
+class Main:
 
     """
     ---------------------------------------------------------------------------
     """
-
-
     ###########################################################################
     ## ATTRIBUTES                                                            ##
     ###########################################################################
@@ -108,6 +176,13 @@ class Main:
        ## Base list:
        self.__bList, playerIdx = self.__populate_list(0,0,nAF,0,0.0);
 
+       #print 'self.__eList, playerIdx = %s, %s\n' % (self.__eList, playerIdx)
+
+       #print 'self.__dList, playerIdx = %s, %s\n' % (self.__dList, playerIdx)
+
+       #print 'self.__pList, playerIdx = %s, %s\n' % (self.__pList, playerIdx)
+
+       #print 'self.__bList, playerIdx = %s, %s\n' % (self.__bList, playerIdx)
 
     ###########################################################################
     ## PUBLIC METHODS                                                        ##
@@ -116,6 +191,7 @@ class Main:
     ## BRIEF:
     ## -----------------------------------------------------------------------
     ##
+
     def __populate_list(self, nList, nAI, nAF, idx, weight):
 
          ## Create player list with the player residents inside the division:
@@ -288,6 +364,8 @@ class Main:
         ## sents in the division).        
         allSize = lenghtE + self.__sizeOfSlot;
 
+        tList = []
+
         if   TYPE == "order":
             ##  Concatane the all lists and ordering the players.
             tList = self.__ordering_players_candidate(
@@ -299,6 +377,7 @@ class Main:
                                                    self.__dList, self.__pList))); 
 
         idx = 0;
+        
         for i in range(0, tList.shape[0]):
 
             if idx < allSize:
@@ -340,6 +419,8 @@ class Main:
        ## Check size of the slots avaliable in the division:
        if (lenghtD + lenghtP) > self.__sizeOfSlot: 
 
+           tList = []
+
            if   TYPE == "order":
                ## Cat two array and ordering;
                tList = self.__ordering_players_candidate(
@@ -380,7 +461,6 @@ class Main:
     ## @PARAM listToOrdering == list to ordering.
     ##
     def __ordering_players_candidate(self, listToOrdering): 
-
         idxOrder = ['w'];
         for idx in range(0, self.__nAF):
             idxOrder.append(str(idx));
@@ -397,16 +477,22 @@ class Main:
     ## @PARAM listToOrdering == list to ordering.
     ##
     ##
-    def __ordering_players_candidate(self, listToOrdering):
-        return listToOrdering;
+    def __pso_players_candidate(self, listToOrdering):
+       # print 'received: %s' % (listToOrdering)
+
+        pso = myPSO(listToOrdering)
+        ordered = pso.run()
+
+        #print 'after: %s' % (listToOrdering)
+
+        return ordered
 
 
 ## END CLASS.
 
 
 
-
-
+ 
 
 
 
