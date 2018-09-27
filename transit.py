@@ -44,9 +44,7 @@ FILE="cases/simulations.txt"
 
 TYPE="pso"
 
-
-
-
+BOUND = [1000, 10, 10, 10, 10, 10, 10, 10]
 
 
 ###############################################################################
@@ -69,12 +67,35 @@ class myPSO:
         self.__options = options
         self.__particles = len(players)
         self.__players = players
-        self.__dimensions = 3
-        self.__constraints = (np.array([-7, -5, -3]),np.array([7, 5, 3]))
+        self.__dimensions = len(players[0]) - 1
+
+        
+
+        upper_bound = [BOUND[0]]
+
+        if len(BOUND) < self.__dimensions:
+            print 'BOUND constant array missing values...'
+
+        for i in range(self.__dimensions - 1):
+                upper_bound.append(BOUND[i+1])
+
+        lower_bound = [x * -1 for x in upper_bound]
+
+        print upper_bound
+        print lower_bound
+        self.__constraints = (np.array(lower_bound),np.array(upper_bound))
+
+
 
     def forward_prop(self,params, idx):
         player = self.__players[idx]
-        return player[1]**params[0] + player[2]**params[1] + player[3]**params[2]
+        
+        value = 0
+        
+        for i in range(len(params)):
+            value = value + player[i+1]*params[i]
+
+        return  -value
 
     def f(self, x):
         n_particles = x.shape[0]
@@ -109,10 +130,10 @@ class myPSO:
 
             # Call instance of PSO
         
-            optimizer = ps.single.GlobalBestPSO(n_particles=self.__particles, dimensions=self.__dimensions, options=self.__options)  
+            optimizer = ps.single.GlobalBestPSO(n_particles=self.__particles, dimensions=self.__dimensions, options=self.__options, bounds=self.__constraints)  
             
             # Perform optimization
-            cost, pos = optimizer.optimize(self.f, print_step=10, iters=100, verbose=0)
+            cost, pos = optimizer.optimize(self.f, print_step=10, iters=1000, verbose=0)
             
         
             player = self.get_player(cost, pos)
@@ -122,8 +143,8 @@ class myPSO:
             self.__particles = self.__particles - 1
             
             #print ordered_list
-            
-        
+            print player
+            quit()
         return np.array(ordered_list)
         
 
@@ -461,6 +482,7 @@ class Main:
     ## @PARAM listToOrdering == list to ordering.
     ##
     def __ordering_players_candidate(self, listToOrdering): 
+        print listToOrdering
         idxOrder = ['w'];
         for idx in range(0, self.__nAF):
             idxOrder.append(str(idx));
@@ -538,16 +560,7 @@ if __name__ == "__main__":
     else:
         for i in range(1,31):
 
-            nP  = 5;
-            nD  = i;
-            nE  = 10;
-
-            nAI = 0;
-            nAF = 2;
-
-            wD  = 1.0;
-            wE  = 0.6;
-            wP  = 0.3;
+            nP  = 5; nD  = i; nE  = 10; nAI = 0; nAF = 2; wD  = 1.0; wE  = 0.6; wP  = 0.3;
 
             sizeOfSlots= 10;
             wDivisions = False;
